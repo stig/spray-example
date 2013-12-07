@@ -4,6 +4,7 @@ import spray.json.DefaultJsonProtocol
 
 trait ModelJsonProtocol extends DefaultJsonProtocol {
 
-  implicit val modelResponseFmt = jsonFormat2(ModelResponse)
+  implicit val itemFmt = jsonFormat3(Item)
+  implicit val itemSummaryFmt = jsonFormat2(ItemSummary)
 
 }

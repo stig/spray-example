@@ -6,6 +6,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import scala.concurrent.duration._
 import spray.httpx.SprayJsonSupport._
+import spray.http.StatusCodes
 
 object Service {
   def props(model: ActorRef): Props = Props(new Service(model))
@@ -24,11 +25,17 @@ trait Route extends HttpService with ModelJsonProtocol {
 
   def route(model: ActorRef) =
     get {
-      path(Segment) { segment =>
-        onSuccess(model ? segment) {
-          case m: ModelResponse => complete(m)
+      path("items") {
+        complete {
+          (model ? 'list).mapTo[Seq[ItemSummary]]
         }
-      }
+      } ~
+        path("items" / IntNumber) { id =>
+          onSuccess(model ? id) {
+            case item: Item => complete(item)
+            case None => complete(StatusCodes.NotFound, "Not Found")
+          }
+        }
     }
 
 }
