@@ -8,18 +8,18 @@ import scala.concurrent.duration._
 import spray.httpx.SprayJsonSupport._
 import spray.http.StatusCodes
 
-object Service {
-  def props(model: ActorRef): Props = Props(new Service(model))
+object ServiceActor {
+  def props(model: ActorRef): Props = Props(new ServiceActor(model))
   def name = "service"
 }
 
-class Service(model: ActorRef) extends Actor with Route {
+class ServiceActor(model: ActorRef) extends Actor with Service {
   def actorRefFactory = context
   def timeout = Timeout(1.second)
   def receive = runRoute(route(model))
 }
 
-trait Route extends HttpService with ModelJsonProtocol {
+trait Service extends HttpService with ModelJsonProtocol {
   implicit def ec = actorRefFactory.dispatcher
   implicit def timeout: Timeout
 

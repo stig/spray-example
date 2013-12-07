@@ -32,7 +32,7 @@ class TopLevel extends Actor with ActorLogging {
   val model = actorOf(Model.props, Model.name)
   context watch model
 
-  val service = actorOf(Service.props(model), Service.name)
+  val service = actorOf(ServiceActor.props(model), ServiceActor.name)
   context watch service
 
   IO(Http) ! Http.Bind(service, interface, port)
