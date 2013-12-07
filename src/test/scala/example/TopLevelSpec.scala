@@ -53,4 +53,19 @@ class TopLevelSpec extends TestKit(ActorSystem()) with FlatSpecLike with BeforeA
     assert(expectMsgType[Terminated].actor === top)
   }
 
+  it should "terminate if it cannot start" in {
+    val top = TestActorRef(new TopLevel with TopLevelConfig {
+      def createModel = context.actorOf(Props(new Act {
+        become { case _ => throw new Exception("crash") }
+      }))
+      def createService(model: ActorRef) = context.actorOf(Props(new Act {
+        become { case _ => throw new Exception("boom") }
+      }))
+      def interface: String = "localhost"
+      def port: Int = 666
+    })
+    watch(top)
+
+    assert(expectMsgType[Terminated].actor === top)
+  }
 }
