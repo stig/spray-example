@@ -5,6 +5,8 @@ import spray.can.Http
 import akka.io.IO
 import akka.actor.Terminated
 import akka.actor.SupervisorStrategy.{ Restart, Stop }
+import akka.util.Timeout
+import java.util.concurrent.TimeUnit
 
 object TopLevel {
   def props: Props = Props(new TopLevel with ProductionTopLevelConfig)
@@ -17,11 +19,13 @@ trait ProductionTopLevelConfig extends TopLevelConfig {
   private def c = context.system.settings.config
   def interface = c.getString("example-app.service.interface")
   def port = c.getInt("example-app.service.port")
+  def askTimeout = Timeout(c.getMilliseconds("example-app.service.ask-timeout"))
 }
 
 trait TopLevelConfig {
   def interface: String
   def port: Int
+  implicit def askTimeout: Timeout
 }
 
 class TopLevel extends Actor with ActorLogging {
