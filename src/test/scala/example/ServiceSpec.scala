@@ -18,9 +18,10 @@ class ServiceSpec extends FlatSpec with ScalatestRouteTest with ModelJsonProtoco
     }
   })
 
+  implicit def timeout = Timeout(3.second)
+
   def route = new Service {
     def actorRefFactory = system
-    def timeout = Timeout(1.second)
   }.route(model)
 
   "The Service" should "return a list" in {
@@ -28,14 +29,19 @@ class ServiceSpec extends FlatSpec with ScalatestRouteTest with ModelJsonProtoco
       assert(status === StatusCodes.OK)
       assert(responseAs[Seq[ItemSummary]].size === 10)
     }
-
   }
 
   it should "return single items" in {
-    Get("/items/1") ~> route ~> check {
+    Get("/items/0") ~> route ~> check {
       assert(status === StatusCodes.OK)
-      assert(responseAs[Item] === Item(1, "title-1", "desc"))
+      assert(responseAs[Item] === Item(0, "title-0", "desc"))
     }
+
+    Get("/items/9") ~> route ~> check {
+      assert(status === StatusCodes.OK)
+      assert(responseAs[Item] === Item(9, "title-9", "desc"))
+    }
+
   }
 
   it should "return 404 for non-existent items" in {

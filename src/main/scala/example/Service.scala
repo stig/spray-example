@@ -15,15 +15,14 @@ object ServiceActor {
 
 class ServiceActor(model: ActorRef) extends Actor with Service {
   def actorRefFactory = context
-  def timeout = Timeout(1.second)
+  implicit def timeout = Timeout(1.second)
   def receive = runRoute(route(model))
 }
 
 trait Service extends HttpService with ModelJsonProtocol {
   implicit def ec = actorRefFactory.dispatcher
-  implicit def timeout: Timeout
 
-  def route(model: ActorRef) =
+  def route(model: ActorRef)(implicit tm: Timeout) =
     get {
       path("items") {
         complete {
