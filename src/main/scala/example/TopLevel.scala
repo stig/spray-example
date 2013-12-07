@@ -7,11 +7,16 @@ import akka.actor.Terminated
 import akka.actor.SupervisorStrategy.{ Restart, Stop }
 
 object TopLevel {
-  def props: Props = Props(new TopLevel with TopLevelConfig {
-    def interface = "localhost"
-    def port = 8080
-  })
+  def props: Props = Props(new TopLevel with ProductionTopLevelConfig)
   def name = "top-level"
+}
+
+trait ProductionTopLevelConfig extends TopLevelConfig {
+  this: Actor =>
+
+  private def c = context.system.settings.config
+  def interface = c.getString("example-app.service.interface")
+  def port = c.getInt("example-app.service.port")
 }
 
 trait TopLevelConfig {
