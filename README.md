@@ -1,12 +1,17 @@
-My Spray Example
-================
+Spray Example
+=============
 
-I intend this as a example project for creating Spray APIs that goes a bit beyond just the routing layer. In particular, it shows how to wire together an API that uses a separate service and model actor.
+I intend this as a example project for creating Spray APIs that goes a bit
+beyond just the routing layer. In particular, it shows how to wire together an
+API that uses a separate service and model actor.
 
-To start the example service, cd into the directory and run sbt. Once SBT starts, run:
+To start the example service, launch a terminal and cd into the directory and
+run sbt:
 
     $ sbt
-    # Once sbt has compiled the build system, run the service:
+
+Once sbt starts the prompt will change. You can start the example service in the background using the `re-start` command, provided by the `sbt-revolver` plugin:
+
     > re-start
 
 In a different terminal (or a browser), call the service:
