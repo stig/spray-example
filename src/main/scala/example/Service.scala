@@ -24,8 +24,11 @@ trait Service extends HttpService with ModelJsonProtocol {
   def route(model: ActorRef)(implicit askTimeout: Timeout) =
     get {
       path("items") {
-        complete {
-          (model ? 'list).mapTo[Seq[ItemSummary]]
+        parameter('q ?) { term =>
+          complete {
+            val msg = term.map('query -> _).getOrElse('list)
+            (model ? msg).mapTo[Seq[ItemSummary]]
+          }
         }
       } ~
         path("items" / IntNumber) { id =>

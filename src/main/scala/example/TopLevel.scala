@@ -20,7 +20,7 @@ trait ProductionTopLevelConfig extends TopLevelConfig {
   def port = c.getInt("example-app.service.port")
   implicit def askTimeout = Timeout(c.getMilliseconds("example-app.service.ask-timeout"))
 
-  def createModel = context.actorOf(Model.props, Model.name)
+  def createModel = context.actorOf(ModelActor.props, ModelActor.name)
   def createService(model: ActorRef) = context.actorOf(ServiceActor.props(model), ServiceActor.name)
 }
 

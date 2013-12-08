@@ -37,6 +37,24 @@ You should see:
       "title": "quuux"
     }]
 
+You can also try getting only the items where the description contains 'Qu':
+
+    $ curl 'localhost:8080/items?q=Qu'
+
+The quotes are necessary because `?` would otherwise be interpreted by the
+shell. Anyway, you should see this:
+
+    [{
+      "id": 3,
+      "title": "qux"
+    }, {
+      "id": 4,
+      "title": "quux"
+    }, {
+      "id": 5,
+      "title": "quuux"
+    }]
+
 Now try getting a single item:
 
     $ curl localhost:8080/items/2
