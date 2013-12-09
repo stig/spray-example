@@ -1,9 +1,22 @@
 Spray Example
 =============
 
-I intend this as a example project for creating Spray APIs that goes a bit
-beyond just the routing layer. In particular, it shows how to wire together an
-API that uses a separate service and model actor.
+I want this to be an example of a Spray API that goes a bit beyond just the
+routing layer. In particular, it shows how to wire together an API that uses a
+separate service and model actor. It also shows off a few tricks I consider good
+practice:
+
+* "Intelligent" cache control. Tailor the upstream cache time per resource.
+
+* Separate on-the-wire protocol. I often see code bases where the domain objects
+contain more annotations than code---often for both JSON and ORM mappings.
+I think this is bad practice and prefer to use different objects.
+
+* Use `sbt-revolver`. This is great plugin by the Spray guys to simplify and
+speed up the dev/build/test cycle.
+
+Running the example service
+---------------------------
 
 To start the example service, launch a terminal and cd into the directory and
 run sbt:
@@ -72,3 +85,4 @@ Finally, try getting an item that doesn't exist:
     $ curl localhost:8080/items/23
 
 You should get a "Not Found" message, and the status code 404.
+

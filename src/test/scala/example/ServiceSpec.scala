@@ -10,7 +10,7 @@ import spray.httpx.SprayJsonSupport._
 import spray.http.CacheDirectives.`max-age`
 import spray.http.HttpHeaders.`Cache-Control`
 
-class ServiceSpec extends FlatSpec with ScalatestRouteTest with ModelJsonProtocol {
+class ServiceSpec extends FlatSpec with ScalatestRouteTest with ServiceJsonProtocol {
 
   val data = Seq.range(1, 11).map(i => Item(i, i + 2, s"title-$i", s"desc-$i"))
   val summary = (i: Item) => ItemSummary(i.id, i.stock, i.title)
@@ -35,9 +35,9 @@ class ServiceSpec extends FlatSpec with ScalatestRouteTest with ModelJsonProtoco
       assert(status === StatusCodes.OK)
       assert(header[`Cache-Control`] === Some(`Cache-Control`(`max-age`(40))))
 
-      val res = responseAs[Seq[ItemSummary]]
+      val res = responseAs[Seq[PublicItemSummary]]
       assert(res.size === data.size)
-      assert(res.head === summary(data.head))
+      assert(res.head === toPublicItemSummary(summary(data.head)))
     }
   }
 
@@ -46,9 +46,9 @@ class ServiceSpec extends FlatSpec with ScalatestRouteTest with ModelJsonProtoco
       assert(status === StatusCodes.OK)
       assert(header[`Cache-Control`] === Some(`Cache-Control`(`max-age`(40))))
 
-      val res = responseAs[Seq[ItemSummary]]
+      val res = responseAs[Seq[PublicItemSummary]]
       assert(res.size === 2)
-      assert(res.head === summary(data.head))
+      assert(res.head === toPublicItemSummary(summary(data.head)))
     }
   }
 
@@ -56,13 +56,13 @@ class ServiceSpec extends FlatSpec with ScalatestRouteTest with ModelJsonProtoco
     Get("/items/1") ~> route ~> check {
       assert(status === StatusCodes.OK)
       assert(header[`Cache-Control`] === Some(`Cache-Control`(`max-age`(40))))
-      assert(responseAs[Item] === Item(1, 3, "title-1", "desc-1"))
+      assert(responseAs[PublicItem] === PublicItem(1, LowStock, "title-1", "desc-1"))
     }
 
     Get("/items/9") ~> route ~> check {
       assert(status === StatusCodes.OK)
       assert(header[`Cache-Control`] === Some(`Cache-Control`(`max-age`(120))))
-      assert(responseAs[Item] === Item(9, 11, "title-9", "desc-9"))
+      assert(responseAs[PublicItem] === PublicItem(9, InStock, "title-9", "desc-9"))
     }
 
   }

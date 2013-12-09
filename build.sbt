@@ -1,4 +1,4 @@
-name := "My Spray Example"
+name := "Spray Example"
 
 version := "0.1.0-SNAPSHOT"
 

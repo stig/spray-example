@@ -21,7 +21,7 @@ class ServiceActor(model: ActorRef)(implicit askTimeout: Timeout) extends Actor 
   def receive = runRoute(route(model))
 }
 
-trait Service extends HttpService with ModelJsonProtocol {
+trait Service extends HttpService with ServiceJsonProtocol {
 
   import scala.language.postfixOps // for 'q ? in parameter() below
 
@@ -44,13 +44,13 @@ trait Service extends HttpService with ModelJsonProtocol {
           onSuccess(model ? msg) {
             case ItemSummaries(summaries) =>
               // Use the smallest stock value in the returned list as a max-age decider
-              complete(OK, scaledCacheHeader(summaries.map(_.stock).min + 1), summaries)
+              complete(OK, scaledCacheHeader(summaries.map(_.stock).min + 1), summaries map toPublicItemSummary)
           }
         }
       } ~
         path("items" / IntNumber) { id =>
           onSuccess(model ? id) {
-            case item: Item => complete(OK, scaledCacheHeader(item.stock + 1), item)
+            case item: Item => complete(OK, scaledCacheHeader(item.stock + 1), toPublicItem(item))
 
             // Cache 404 for 60 seconds
             case None => complete(StatusCodes.NotFound, cacheHeader(60), "Not Found")
