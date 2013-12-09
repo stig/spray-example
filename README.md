@@ -37,18 +37,23 @@ You should see:
 
     [{
       "id": 1,
+      "stockLevel": "LowStock",
       "title": "foo"
     }, {
       "id": 2,
+      "stockLevel": "LowStock",
       "title": "bar"
     }, {
       "id": 3,
+      "stockLevel": "InStock",
       "title": "qux"
     }, {
       "id": 4,
+      "stockLevel": "InStock",
       "title": "quux"
     }, {
       "id": 5,
+      "stockLevel": "InStock",
       "title": "quuux"
     }]
 
@@ -61,12 +66,15 @@ shell. Anyway, you should see this:
 
     [{
       "id": 3,
+      "stockLevel": "InStock",
       "title": "qux"
     }, {
       "id": 4,
+      "stockLevel": "InStock",
       "title": "quux"
     }, {
       "id": 5,
+      "stockLevel": "InStock",
       "title": "quuux"
     }]
 
@@ -78,6 +86,7 @@ You should see:
 
     {
       "id": 2,
+      "stockLevel": "LowStock",
       "title": "bar",
       "desc": "More information about Bar"
     }
