@@ -12,8 +12,10 @@ practice:
 contain more annotations than code---often for both JSON and ORM mappings.
 I think this is bad practice and prefer to use different objects.
 
-* Use `sbt-revolver`. This is great plugin by the Spray guys to simplify and
+* Use [sbt-revolver][]. This is great plugin by the Spray guys to simplify and
 speed up the dev/build/test cycle.
+
+[sbt-revolver]: https://github.com/spray/sbt-revolver
 
 Running the example service
 ---------------------------
