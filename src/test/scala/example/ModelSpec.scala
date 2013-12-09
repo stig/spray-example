@@ -16,6 +16,7 @@ class ModelSpec extends FlatSpec {
     val item = get(1).get
     assert(item.id === 1)
     assert(item.title === "foo")
+    assert(item.stock === 2)
   }
 
   it should "return None when requested item is not found" in new Model {

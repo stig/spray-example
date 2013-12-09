@@ -4,6 +4,8 @@ version := "0.1.0-SNAPSHOT"
 
 scalaVersion := "2.10.3"
 
+scalacOptions ++= Seq("-feature")
+
 resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
 
 resolvers += "spray repo" at "http://repo.spray.io"

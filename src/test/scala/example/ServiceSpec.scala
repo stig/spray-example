@@ -7,17 +7,19 @@ import akka.util.Timeout
 import scala.concurrent.duration._
 import spray.http.StatusCodes
 import spray.httpx.SprayJsonSupport._
+import spray.http.CacheDirectives.`max-age`
+import spray.http.HttpHeaders.`Cache-Control`
 
 class ServiceSpec extends FlatSpec with ScalatestRouteTest with ModelJsonProtocol {
 
-  val data = Seq.range(1, 11).map(i => Item(i, s"title-$i", s"desc-$i"))
-  val summary = (i: Item) => ItemSummary(i.id, i.title)
+  val data = Seq.range(1, 11).map(i => Item(i, i + 2, s"title-$i", s"desc-$i"))
+  val summary = (i: Item) => ItemSummary(i.id, i.stock, i.title)
 
   val model = actor(new Act {
     become {
       case i: Int => sender ! data.find(_.id == i).getOrElse(None)
-      case 'list => sender ! data.map(summary)
-      case ('query, x: String) => sender ! data.filter(_.desc.contains(x)).map(summary)
+      case 'list => sender ! ItemSummaries(data.map(summary))
+      case ('query, x: String) => sender ! ItemSummaries(data.filter(_.desc.contains(x)).map(summary))
 
     }
   })
@@ -31,26 +33,36 @@ class ServiceSpec extends FlatSpec with ScalatestRouteTest with ModelJsonProtoco
   "The Service" should "return a list of 10 items" in {
     Get("/items") ~> route ~> check {
       assert(status === StatusCodes.OK)
-      assert(responseAs[Seq[ItemSummary]].size === 10)
+      assert(header[`Cache-Control`] === Some(`Cache-Control`(`max-age`(40))))
+
+      val res = responseAs[Seq[ItemSummary]]
+      assert(res.size === data.size)
+      assert(res.head === summary(data.head))
     }
   }
 
   it should "return a list of 2 items containing '1'" in {
     Get("/items?q=1") ~> route ~> check {
       assert(status === StatusCodes.OK)
-      assert(responseAs[Seq[ItemSummary]].size === 2)
+      assert(header[`Cache-Control`] === Some(`Cache-Control`(`max-age`(40))))
+
+      val res = responseAs[Seq[ItemSummary]]
+      assert(res.size === 2)
+      assert(res.head === summary(data.head))
     }
   }
 
   it should "return single items" in {
     Get("/items/1") ~> route ~> check {
       assert(status === StatusCodes.OK)
-      assert(responseAs[Item] === Item(1, "title-1", "desc-1"))
+      assert(header[`Cache-Control`] === Some(`Cache-Control`(`max-age`(40))))
+      assert(responseAs[Item] === Item(1, 3, "title-1", "desc-1"))
     }
 
     Get("/items/9") ~> route ~> check {
       assert(status === StatusCodes.OK)
-      assert(responseAs[Item] === Item(9, "title-9", "desc-9"))
+      assert(header[`Cache-Control`] === Some(`Cache-Control`(`max-age`(120))))
+      assert(responseAs[Item] === Item(9, 11, "title-9", "desc-9"))
     }
 
   }
@@ -58,6 +70,8 @@ class ServiceSpec extends FlatSpec with ScalatestRouteTest with ModelJsonProtoco
   it should "return 404 for non-existent items" in {
     Get("/items/404") ~> route ~> check {
       assert(status === StatusCodes.NotFound)
+      assert(header[`Cache-Control`] === Some(`Cache-Control`(`max-age`(60))))
+      response === "Not Found"
     }
   }
 

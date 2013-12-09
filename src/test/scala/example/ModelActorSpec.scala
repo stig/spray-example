@@ -14,14 +14,14 @@ class ModelActorSpec extends TestKit(ActorSystem()) with FlatSpecLike with Impli
 
   "A Model" should "return a list of 5 ItemSummaries" in {
     model ! 'list
-    val lst = expectMsgType[Seq[ItemSummary]]
-    assert(lst.size === 5)
+    val lst = expectMsgType[ItemSummaries]
+    assert(lst.items.size === 5)
   }
 
   it should "return 3 items containing 'Qu'" in {
     model ! ('query, "Qu")
-    val lst = expectMsgType[Seq[ItemSummary]]
-    assert(lst.size === 3)
+    val lst = expectMsgType[ItemSummaries]
+    assert(lst.items.size === 3)
   }
 
   it should "return item 1 when asked" in {
