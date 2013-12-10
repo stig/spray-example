@@ -3,7 +3,7 @@ Spray Example
 
 I want this to be an example of a Spray API that goes a bit beyond just the
 routing layer. In particular, it shows how to wire together an API that uses a
-separate service and model actor. It also shows off a few tricks I consider good
+separate service and model actor. It also shows off a few things I consider good
 practice:
 
 * "Intelligent" cache control. Tailor the upstream cache time per resource.
@@ -14,6 +14,10 @@ I think this is bad practice and prefer to use different objects.
 
 * Use [sbt-revolver][]. This is great plugin by the Spray guys to simplify and
 speed up the dev/build/test cycle.
+
+* Stub out child actors for testing using the *Cake Pattern*. See the
+`TopLevelConfig` trait and its corresponding `ProductionTopLevelConfig`
+implementation for more details.
 
 [sbt-revolver]: https://github.com/spray/sbt-revolver
 
