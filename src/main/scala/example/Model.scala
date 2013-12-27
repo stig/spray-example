@@ -2,17 +2,16 @@ package example
 
 import akka.actor.{ Props, Actor }
 
-case object ItemNotFound
-case class Item(id: Int, stock: Int, title: String, desc: String)
-case class ItemSummary(id: Int, stock: Int, title: String)
-case class ItemSummaries(items: Seq[ItemSummary])
-
 object ModelActor {
   def props: Props = Props[ModelActor]
   def name = "model"
+
+  case object ItemNotFound
+  case class ItemSummaries(items: Seq[ItemSummary])
 }
 
 class ModelActor extends Actor with Model {
+  import ModelActor._
 
   def receive = {
     case id: Int =>

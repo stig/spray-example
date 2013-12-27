@@ -6,6 +6,8 @@ import akka.actor.{ Props, ActorSystem }
 
 class ModelActorSpec extends TestKit(ActorSystem()) with FlatSpecLike with ImplicitSender with BeforeAndAfterAll {
 
+  import ModelActor._
+
   override def afterAll() {
     system.shutdown()
   }

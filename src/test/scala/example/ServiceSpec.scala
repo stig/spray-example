@@ -12,6 +12,8 @@ import spray.http.HttpHeaders.`Cache-Control`
 
 class ServiceSpec extends FlatSpec with ScalatestRouteTest with ServiceJsonProtocol {
 
+  import ModelActor._
+
   val data = Seq.range(1, 11).map(i => Item(i, i + 2, s"title-$i", s"desc-$i"))
   val summary = (i: Item) => ItemSummary(i.id, i.stock, i.title)
 

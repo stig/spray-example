@@ -23,6 +23,8 @@ class ServiceActor(model: ActorRef, implicit val askTimeout: Timeout) extends Ac
 
 trait Service extends HttpService with ServiceJsonProtocol {
 
+  import ModelActor._
+
   import scala.language.postfixOps // for 'q ? in parameter() below
 
   implicit def ec = actorRefFactory.dispatcher
