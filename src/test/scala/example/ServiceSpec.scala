@@ -35,35 +35,35 @@ class ServiceSpec extends FlatSpec with ScalatestRouteTest with ServiceJsonProto
   "The Service" should "return a list of 10 items" in {
     Get("/items") ~> route ~> check {
       assert(status === StatusCodes.OK)
-      assert(header[`Cache-Control`] === Some(`Cache-Control`(`max-age`(40))))
+      assert(header[`Cache-Control`] === Some(`Cache-Control`(`max-age`(10))))
 
       val res = responseAs[Seq[PublicItemSummary]]
       assert(res.size === data.size)
-      assert(res.head === toPublicItemSummary(summary(data.head)))
+      assert(res.head === PublicItemSummary(summary(data.head)))
     }
   }
 
   it should "return a list of 2 items containing '1'" in {
     Get("/items?q=1") ~> route ~> check {
       assert(status === StatusCodes.OK)
-      assert(header[`Cache-Control`] === Some(`Cache-Control`(`max-age`(40))))
+      assert(header[`Cache-Control`] === Some(`Cache-Control`(`max-age`(10))))
 
       val res = responseAs[Seq[PublicItemSummary]]
       assert(res.size === 2)
-      assert(res.head === toPublicItemSummary(summary(data.head)))
+      assert(res.head === PublicItemSummary(summary(data.head)))
     }
   }
 
   it should "return single items" in {
     Get("/items/1") ~> route ~> check {
       assert(status === StatusCodes.OK)
-      assert(header[`Cache-Control`] === Some(`Cache-Control`(`max-age`(40))))
+      assert(header[`Cache-Control`] === Some(`Cache-Control`(`max-age`(10))))
       assert(responseAs[PublicItem] === PublicItem(1, LowStock, "title-1", "desc-1"))
     }
 
     Get("/items/9") ~> route ~> check {
       assert(status === StatusCodes.OK)
-      assert(header[`Cache-Control`] === Some(`Cache-Control`(`max-age`(120))))
+      assert(header[`Cache-Control`] === Some(`Cache-Control`(`max-age`(30))))
       assert(responseAs[PublicItem] === PublicItem(9, InStock, "title-9", "desc-9"))
     }
 

@@ -29,14 +29,16 @@ trait Service extends HttpService with ServiceJsonProtocol {
 
   implicit def ec = actorRefFactory.dispatcher
 
-  /*
-   One of the main benefits of a custom API (rather than just serving from a dumb data store)
-   is that one can add customised caching. In this case we instruct upstream caches to cache
-   an item for 10 second per item in stock.
-   */
-  val cacheSecondsPerItemInStock = 10
   val cacheHeader = (maxAge: Long) => `Cache-Control`(`max-age`(maxAge)) :: Nil
-  val scaledCacheHeader = (maxAge: Long) => cacheHeader(maxAge * cacheSecondsPerItemInStock)
+
+  // To avoid leaking exact stock levels via cache control header's max-age
+  // use a formula to obfuscate the levels a bit. Because this is an example I'm
+  // hard-coding cache multipliers here.
+  val cacheTime = (stockLevel: Int) =>
+    if (stockLevel > 0)
+      10 * math.sqrt(stockLevel).toLong
+    else
+      100L
 
   def route(model: ActorRef)(implicit askTimeout: Timeout) =
     get {
@@ -44,18 +46,27 @@ trait Service extends HttpService with ServiceJsonProtocol {
         parameter('q ?) { term =>
           val msg = term.map('query -> _).getOrElse('list)
           onSuccess(model ? msg) {
+            case ItemSummaries(Nil) =>
+              // Cache an empty list for 60 seconds (similar to 404 below)
+              complete(OK, cacheHeader(60), List.empty[PublicItem])
+
             case ItemSummaries(summaries) =>
               // Use the smallest stock value in the returned list as a max-age decider
-              complete(OK, scaledCacheHeader(summaries.map(_.stock).min + 1), summaries map toPublicItemSummary)
+              val maxAge = cacheTime(summaries.map(_.stock).min)
+              complete(OK, cacheHeader(maxAge), summaries map { PublicItemSummary(_) })
           }
         }
       } ~
         path("items" / IntNumber) { id =>
           onSuccess(model ? id) {
-            case item: Item => complete(OK, scaledCacheHeader(item.stock + 1), toPublicItem(item))
+            case item: Item =>
+              // Cache items in stock by a function of their stock level
+              val maxAge = cacheTime(item.stock)
+              complete(OK, cacheHeader(maxAge), PublicItem(item))
 
-            // Cache 404 for 60 seconds
-            case ItemNotFound => complete(StatusCodes.NotFound, cacheHeader(60), "Not Found")
+            case ItemNotFound =>
+              // Cache 404 for 60 seconds
+              complete(StatusCodes.NotFound, cacheHeader(60), "Not Found")
           }
         }
     }

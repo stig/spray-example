@@ -14,13 +14,16 @@ case object LowStock extends StockLevel
 case object SoldOut extends StockLevel
 
 case class PublicItem(id: Int, stockLevel: StockLevel, title: String, desc: String)
+object PublicItem {
+  def apply(i: Item): PublicItem = PublicItem(i.id, StockLevel(i.stock), i.title, i.desc)
+}
 
 case class PublicItemSummary(id: Int, stockLevel: StockLevel, title: String)
+object PublicItemSummary {
+  def apply(i: ItemSummary): PublicItemSummary = PublicItemSummary(i.id, StockLevel(i.stock), i.title)
+}
 
 trait ServiceJsonProtocol extends DefaultJsonProtocol {
-
-  val toPublicItem = (i: Item) => PublicItem(i.id, StockLevel(i.stock), i.title, i.desc)
-  val toPublicItemSummary = (i: ItemSummary) => PublicItemSummary(i.id, StockLevel(i.stock), i.title)
 
   implicit object StockLevelFmt extends JsonFormat[StockLevel] {
     def write(obj: StockLevel) = JsString(obj.toString)
@@ -32,7 +35,7 @@ trait ServiceJsonProtocol extends DefaultJsonProtocol {
     }
   }
 
-  implicit val publicItemFmt = jsonFormat4(PublicItem)
-  implicit val publicItemSummaryFmt = jsonFormat3(PublicItemSummary)
+  implicit val publicItemFmt = jsonFormat4(PublicItem.apply)
+  implicit val publicItemSummaryFmt = jsonFormat3(PublicItemSummary.apply)
 
 }
