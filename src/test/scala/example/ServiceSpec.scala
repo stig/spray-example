@@ -17,7 +17,7 @@ class ServiceSpec extends FlatSpec with ScalatestRouteTest with ServiceJsonProto
 
   val model = actor(new Act {
     become {
-      case i: Int => sender ! data.find(_.id == i).getOrElse(None)
+      case i: Int => sender ! data.find(_.id == i).getOrElse(ItemNotFound)
       case 'list => sender ! ItemSummaries(data.map(summary))
       case ('query, x: String) => sender ! ItemSummaries(data.filter(_.desc.contains(x)).map(summary))
 

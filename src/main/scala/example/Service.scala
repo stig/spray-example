@@ -53,7 +53,7 @@ trait Service extends HttpService with ServiceJsonProtocol {
             case item: Item => complete(OK, scaledCacheHeader(item.stock + 1), toPublicItem(item))
 
             // Cache 404 for 60 seconds
-            case None => complete(StatusCodes.NotFound, cacheHeader(60), "Not Found")
+            case ItemNotFound => complete(StatusCodes.NotFound, cacheHeader(60), "Not Found")
           }
         }
     }

@@ -31,9 +31,9 @@ class ModelActorSpec extends TestKit(ActorSystem()) with FlatSpecLike with Impli
     assert(item.title === "foo")
   }
 
-  it should "return None when requested item is not found" in {
+  it should "return ItemNotFound when requested item is not found" in {
     model ! 10
-    expectMsg(None)
+    expectMsg(ItemNotFound)
   }
 
 }
