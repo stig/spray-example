@@ -12,11 +12,11 @@ import spray.http.HttpHeaders.`Cache-Control`
 import spray.http.StatusCodes._
 
 object ServiceActor {
-  def props(model: ActorRef)(implicit askTimeout: Timeout): Props = Props(new ServiceActor(model))
+  def props(model: ActorRef)(implicit askTimeout: Timeout): Props = Props(classOf[ServiceActor], model, askTimeout)
   def name = "service"
 }
 
-class ServiceActor(model: ActorRef)(implicit askTimeout: Timeout) extends Actor with Service {
+class ServiceActor(model: ActorRef, implicit val askTimeout: Timeout) extends Actor with Service {
   def actorRefFactory = context
   def receive = runRoute(route(model))
 }

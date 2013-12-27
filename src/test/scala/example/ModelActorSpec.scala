@@ -2,7 +2,7 @@ package example
 
 import org.scalatest.{ FlatSpecLike, BeforeAndAfterAll }
 import akka.testkit.{ TestActorRef, ImplicitSender, TestKit }
-import akka.actor.ActorSystem
+import akka.actor.{ Props, ActorSystem }
 
 class ModelActorSpec extends TestKit(ActorSystem()) with FlatSpecLike with ImplicitSender with BeforeAndAfterAll {
 
@@ -10,7 +10,7 @@ class ModelActorSpec extends TestKit(ActorSystem()) with FlatSpecLike with Impli
     system.shutdown()
   }
 
-  val model = TestActorRef(new ModelActor)
+  val model = TestActorRef(Props[ModelActor])
 
   "A Model" should "return a list of 5 ItemSummaries" in {
     model ! 'list

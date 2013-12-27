@@ -8,7 +8,7 @@ case class ItemSummary(id: Int, stock: Int, title: String)
 case class ItemSummaries(items: Seq[ItemSummary])
 
 object ModelActor {
-  def props: Props = Props(new ModelActor)
+  def props: Props = Props[ModelActor]
   def name = "model"
 }
 

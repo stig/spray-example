@@ -2,8 +2,17 @@ package example
 
 import org.scalatest.{ BeforeAndAfterAll, FlatSpecLike }
 import akka.actor.ActorDSL._
-import akka.actor.{ Terminated, Props, ActorRef, ActorSystem }
+import akka.actor._
 import akka.testkit.{ EventFilter, TestActorRef, ImplicitSender, TestKit }
+import akka.actor.Terminated
+
+class Crash extends Actor {
+  def receive = { case _ => throw new Exception("crash") }
+}
+
+class Boom extends Actor {
+  def receive = { case _ => throw new Exception("boom") }
+}
 
 class TopLevelSpec extends TestKit(ActorSystem()) with FlatSpecLike with BeforeAndAfterAll with ImplicitSender {
 
@@ -14,15 +23,8 @@ class TopLevelSpec extends TestKit(ActorSystem()) with FlatSpecLike with BeforeA
 
   trait Case {
     val top = TestActorRef(new TopLevel with TopLevelConfig {
-
-      def createModel = context.actorOf(Props(new Act {
-        become { case _ => throw new Exception("crash") }
-      }))
-
-      def createService(model: ActorRef) = context.actorOf(Props(new Act {
-        become { case _ => throw new Exception("boom") }
-      }))
-
+      def createModel = context.actorOf(Props[Crash])
+      def createService(model: ActorRef) = context.actorOf(Props[Boom])
       def interface: String = "localhost"
       def port: Int = (10000 + math.random * 50000).toInt
     })
@@ -55,12 +57,8 @@ class TopLevelSpec extends TestKit(ActorSystem()) with FlatSpecLike with BeforeA
 
   it should "terminate if it cannot start" in {
     val top = TestActorRef(new TopLevel with TopLevelConfig {
-      def createModel = context.actorOf(Props(new Act {
-        become { case _ => throw new Exception("crash") }
-      }))
-      def createService(model: ActorRef) = context.actorOf(Props(new Act {
-        become { case _ => throw new Exception("boom") }
-      }))
+      def createModel = context.actorOf(Props[Crash])
+      def createService(model: ActorRef) = context.actorOf(Props[Boom])
       def interface: String = "localhost"
       def port: Int = 666
     })
