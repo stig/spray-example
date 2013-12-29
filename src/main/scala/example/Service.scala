@@ -29,16 +29,13 @@ trait Service extends HttpService with ServiceJsonProtocol {
 
   implicit def ec = actorRefFactory.dispatcher
 
-  val cacheHeader = (maxAge: Long) => `Cache-Control`(`max-age`(maxAge)) :: Nil
+  val CacheHeader = (maxAge: Long) => `Cache-Control`(`max-age`(maxAge)) :: Nil
 
-  // To avoid leaking exact stock levels via cache control header's max-age
-  // use a formula to obfuscate the levels a bit. Because this is an example I'm
-  // hard-coding cache multipliers here.
-  val cacheTime = (stockLevel: Int) =>
-    if (stockLevel > 0)
-      10 * math.sqrt(stockLevel).toLong
-    else
-      100L
+  // Cache items by a function of their stock level, but avoid leaking exact
+  // stock levels via the Cache-Control header's max-age. Because this is an
+  // example I'm hard-coding cache multipliers here.
+  val MaxAge = (stockLevel: Int) => 10 * math.sqrt(10 + stockLevel).toLong
+  val MaxAge404 = 600l
 
   def route(model: ActorRef)(implicit askTimeout: Timeout) =
     get {
@@ -46,27 +43,24 @@ trait Service extends HttpService with ServiceJsonProtocol {
         parameter('q ?) { term =>
           val msg = term.map('query -> _).getOrElse('list)
           onSuccess(model ? msg) {
-            case ItemSummaries(Nil) =>
-              // Cache an empty list for 60 seconds (similar to 404 below)
-              complete(OK, cacheHeader(60), List.empty[PublicItem])
-
             case ItemSummaries(summaries) =>
-              // Use the smallest stock value in the returned list as a max-age decider
-              val maxAge = cacheTime(summaries.map(_.stock).min)
-              complete(OK, cacheHeader(maxAge), summaries map { PublicItemSummary(_) })
+              // Use smallest stock value in (potentially empty) list as basis
+              // for calculating max-age
+              val maxAge = summaries match {
+                case Nil => MaxAge404
+                case xs => MaxAge(xs.map(_.stock).reduce(math.min))
+              }
+              complete(OK, CacheHeader(maxAge), summaries map { PublicItemSummary(_) })
           }
         }
       } ~
         path("items" / IntNumber) { id =>
           onSuccess(model ? id) {
             case item: Item =>
-              // Cache items in stock by a function of their stock level
-              val maxAge = cacheTime(item.stock)
-              complete(OK, cacheHeader(maxAge), PublicItem(item))
+              complete(OK, CacheHeader(MaxAge(item.stock)), PublicItem(item))
 
             case ItemNotFound =>
-              // Cache 404 for 60 seconds
-              complete(StatusCodes.NotFound, cacheHeader(60), "Not Found")
+              complete(StatusCodes.NotFound, CacheHeader(MaxAge404), "Not Found")
           }
         }
     }
