@@ -44,10 +44,9 @@ trait Service extends HttpService with ServiceJsonProtocol {
           val msg = term.map('query -> _).getOrElse('list)
           onSuccess(model ? msg) {
             case ItemSummaries(summaries) =>
-              // Use smallest stock value in (potentially empty) list as basis
-              // for calculating max-age
               val maxAge = summaries match {
                 case Nil => MaxAge404
+                // Use smallest stock value in list for calculating max-age
                 case xs => MaxAge(xs.map(_.stock).reduce(math.min))
               }
               complete(OK, CacheHeader(maxAge), summaries map { PublicItemSummary(_) })
